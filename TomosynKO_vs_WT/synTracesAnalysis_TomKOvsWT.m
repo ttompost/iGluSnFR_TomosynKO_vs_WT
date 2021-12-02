@@ -1,26 +1,12 @@
 %% add paths
-addpath(genpath('/Users/teatompos/Documents/MATLAB/VU_thesis_internship/Analysis_scripts/'));
-addpath(genpath('/Volumes/EXTMEMTEA/uni/LCI_iGluSnFR/'));
-addpath(genpath('/Users/teatompos/Documents/MATLAB/RU_1st_internship_Neurophysiology_Dept/n4_backup/CoreFunctions/'));
+yourPath = '';
+addpath(genpath(yourPath));
 
 %% load main data
 clear all; close all;
-% [~,~,taggedConditions] = xlsread('TomKOvsWT_labelledConditions.xlsx');
-% taggedConditions = cell2table(taggedConditions,'VariableNames',{'ImagingDate','Coverslip','Condition','Tag'});
-% 
-% tomVSwt = sortConcatenatedIGluSnFRdata('/Volumes/EXTMEMTEA/uni/LCI_iGluSnFR/TomKOvsWT',taggedConditions);
-% save('tomVSwt.mat','tomVSwt');
-% 
-load tomVSwt.mat
-% load tomVswt_raster075data.mat
-% load tomVswt_raster2data.mat
-% load tomVswt_rasterRecovery.mat
-% load evaluatedPeaks.mat
-% load tomVSwt_gabaCells.mat
 
-tomVSwt(1:24,:)=[];
-% tomVSwt = [tomVSwt, tomVswt_raster075data, tomVswt_raster2data, tomVswt_rasterRecovery];
-clearvars -except tomVSwt
+load TomosynKO_RawData.mat
+
 tomVSwt = detrendSynapticTraces(tomVSwt, 'tomVSwt',[99, 101]); % windows were chosen based on a priori exploratory analysis
 tomVSwt = getEvokedAmplitudes(tomVSwt, 'tomVSwt');
 
