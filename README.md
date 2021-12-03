@@ -1,7 +1,7 @@
 # Project description:
-Fluorescence imaging of the cultured excitatory neurons expressing an optical reporter named iGluSnFR (Marvin et al., 2013). iGluSnFR is sensitive to glutamate, hence it allows for detection of excitatory synaptic activiy with single synapse precision.
+Fluorescence imaging of cultured excitatory neurons expressing the optical reporter named iGluSnFR (Marvin et al., 2013). iGluSnFR is sensitive to glutamate, hence it allows for the detection of excitatory synaptic activity with single synaptic precision.
 
-Herein provided scripts contain the code for the set of figures comparing the activity of Tomosyn knockout (KO) neurons with the wild type (WT) response. Both cell lines undergo electrical stimulation with the local field potential electrode. Their response is recorded under the epifluorescence microscope.
+Herein provided scripts contain the code for the set of figures comparing the activity of Tomosyn knockout (KO) neurons to the wild type (WT) response. Both cell lines undergo electrical stimulation with the local field potential electrode. Their response is recorded under the epifluorescence microscope. The raw fluorescence traces are stored in ./TomosynKO_vs_WT/Data/TomosynKO_RawData.mat
 
 
 Ref:
