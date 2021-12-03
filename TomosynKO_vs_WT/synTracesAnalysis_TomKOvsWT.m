@@ -72,60 +72,70 @@ for pt = 1:length(plotTypes)
 end
 
 %% Calculate synaptic participation per cell
-stimStarts_075 = [600 615 630 645 660];
-frontTail_075 = 4;
-backTail_075 = 9;
-minScore_075 = 7;
+% load the already existing data:
+load TomosynKO_SynapticParticipation_075Hz.mat % participation during 0.75 Hz
+load TomosynKO_SynapticParticipation_2Hz.mat % participation during 2 Hz
+    % and add this data to the table:
+tomVSwt = [tomVSwt, tomVswt_raster075data, tomVswt_raster2data];
 
-stimStart_2 = 810;
-frontTail_2 = 3;
-backTail_2 = 4;
-minScore_2 = 5;
+%%%  this code runs the calculation from scratch (about 30min with 2 workers)
+% stimStarts_075 = [600 615 630 645 660];
+% frontTail_075 = 4;
+% backTail_075 = 9;
+% minScore_075 = 7;
+% 
+% stimStart_2 = 810;
+% frontTail_2 = 3;
+% backTail_2 = 4;
+% minScore_2 = 5;
 
-parfor cellNum = 1:size(tomVSwt,1)
-    apScores_075 = []; apScores_2 = [];
-    apPositions_075 = []; apPositions_2 = [];
-    apBinary_075 = []; apBinary_2 = [];
-    for synNum = 1:size(tomVSwt.dFoverF0_detrend{cellNum,1},1)
-        for apTime = 1:length(stimStarts_075)
-            noiseStart075 = randi(580);
-            noiseTrace075 = tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,noiseStart075:noiseStart075+backTail_075);
-            [apBin_075, apScore_075, apPos_075] = isItAP(tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,stimStarts_075(apTime)-frontTail_075:stimStarts_075(apTime)+backTail_075),...
-                noiseTrace075, 'ap', minScore_075); 
-            
-            apScores_075(synNum, apTime) = apScore_075;
-            if apPos_075 ~= 0
-               apPos_075 = apPos_075 + (stimStarts_075(apTime)-frontTail_075-1);
-            end 
-            apPositions_075(synNum, apTime) = apPos_075;
-            apBinary_075(synNum, apTime) = apBin_075;
-            
-            % analyse only the first AP for 2Hz
-            if apTime == 1 
-                noiseStart2 = randi([880 980]);
-                noiseTrace2 = tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,noiseStart2:noiseStart2+backTail_2+frontTail_2);
-                [apBin_2, apScore_2, apPos_2] = isItAP(tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,stimStart_2-frontTail_2:stimStart_2+backTail_2),...
-                    noiseTrace2, 'ap', minScore_2); 
-                apScores_2(synNum, apTime) = apScore_2;
-                if apPos_2 ~= 0
-                    apPos_2 = apPos_2 + (stimStart_2-frontTail_2-1);
-                end 
-                apPositions_2(synNum, apTime) = apPos_2;
-                apBinary_2(synNum, apTime) = apBin_2;
-            end
-        end
-    end
-    allApEvals_bin_075{cellNum,1} = apBinary_075;
-    allApEvals_scores_075{cellNum,1} = apScores_075;
-    allApEvals_pos_075{cellNum,1} = apPositions_075;
-    
-    allApEvals_bin_2{cellNum,1} = apBinary_2;
-    allApEvals_scores_2{cellNum,1} = apScores_2;
-    allApEvals_pos_2{cellNum,1} = apPositions_2;
-end
-tomVSwt = [tomVSwt, table(allApEvals_bin_075, allApEvals_scores_075, allApEvals_pos_075, allApEvals_bin_2, allApEvals_scores_2, allApEvals_pos_2, ...
-    'variablenames',{'binaryRaster075','apScores075','apPositions075','binaryRaster2','apScores2','apPositions2'})];
-fprintf('Done.\n')
+% parfor cellNum = 1:size(tomVSwt,1)
+%     apScores_075 = []; apScores_2 = [];
+%     apPositions_075 = []; apPositions_2 = [];
+%     apBinary_075 = []; apBinary_2 = [];
+%     for synNum = 1:size(tomVSwt.dFoverF0_detrend{cellNum,1},1)
+%         for apTime = 1:length(stimStarts_075)
+%             noiseStart075 = randi(580);
+%             noiseTrace075 = tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,noiseStart075:noiseStart075+backTail_075);
+%             [apBin_075, apScore_075, apPos_075] = isItAP(tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,stimStarts_075(apTime)-frontTail_075:stimStarts_075(apTime)+backTail_075),...
+%                 noiseTrace075, 'ap', minScore_075); 
+%             
+%             apScores_075(synNum, apTime) = apScore_075;
+%             if apPos_075 ~= 0
+%                apPos_075 = apPos_075 + (stimStarts_075(apTime)-frontTail_075-1);
+%             end 
+%             apPositions_075(synNum, apTime) = apPos_075;
+%             apBinary_075(synNum, apTime) = apBin_075;
+%             
+%             % analyse only the first AP for 2Hz
+%             if apTime == 1 
+%                 noiseStart2 = randi([880 980]);
+%                 noiseTrace2 = tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,noiseStart2:noiseStart2+backTail_2+frontTail_2);
+%                 [apBin_2, apScore_2, apPos_2] = isItAP(tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,stimStart_2-frontTail_2:stimStart_2+backTail_2),...
+%                     noiseTrace2, 'ap', minScore_2); 
+%                 apScores_2(synNum, apTime) = apScore_2;
+%                 if apPos_2 ~= 0
+%                     apPos_2 = apPos_2 + (stimStart_2-frontTail_2-1);
+%                 end 
+%                 apPositions_2(synNum, apTime) = apPos_2;
+%                 apBinary_2(synNum, apTime) = apBin_2;
+%             end
+%         end
+%     end
+%     allApEvals_bin_075{cellNum,1} = apBinary_075;
+%     allApEvals_scores_075{cellNum,1} = apScores_075;
+%     allApEvals_pos_075{cellNum,1} = apPositions_075;
+%     
+%     allApEvals_bin_2{cellNum,1} = apBinary_2;
+%     allApEvals_scores_2{cellNum,1} = apScores_2;
+%     allApEvals_pos_2{cellNum,1} = apPositions_2;
+% end
+% try % if ran from scratch
+%     tomVSwt = [tomVSwt, table(allApEvals_bin_075, allApEvals_scores_075, allApEvals_pos_075, allApEvals_bin_2, allApEvals_scores_2, allApEvals_pos_2, ...
+%         'variablenames',{'binaryRaster075','apScores075','apPositions075','binaryRaster2','apScores2','apPositions2'})];
+% catch ME
+% end
+% fprintf('Done.\n')
 
 %% Plot synaptic participation per cell
 genotypes = [148, 225];
@@ -169,17 +179,17 @@ for g = 1:length(genotypes)
 end
 
 
-%%  Plot average 0.75Hz AP shape in active synapse (per week)
+%%  Plot average 0.75Hz AP shape in active synapse (optional: per week)
 stimStarts_075 = [600 615 630 645 660];
 frontTail_075 = 4; backTail_075 = 9;
 colors = ['k','b']; genotypes = [148, 225];
-for w = [22 25 26]
+for w = 1%[22 25 26] % use the array with week labels to plot for each week separately
     f1=figure('name',['week ' num2str(w) ' amplitudes 0.75Hz']); set(f1,'windowstyle','docked'); clf;
     f2=figure('name',['week ' num2str(w) ' shapes 0.75Hz']); set(f2,'windowstyle','docked'); clf;
     f3=figure('name',['week ' num2str(w) ' COVs 0.75Hz']); set(f3,'windowstyle','docked'); clf;
     for g = 1:length(genotypes)
         shift_x = g-1; shift_jitter = 10000; color = colors(g);%clf;
-        thisCondition = tomVSwt(tomVSwt.Condition == num2str(genotypes(g)) & tomVSwt.Week == w,:);
+        thisCondition = tomVSwt(tomVSwt.Condition == num2str(genotypes(g)),:);% & tomVSwt.Week == w,:); % use the extra filter option to plot for each week separately
         for ap = 1:length(stimStarts_075)
             % clear variables here if you plot them for per AP for all cells
             ampMeans = []; covMeans = [];  decayTimes = []; riseTimes = []; allShapesMeans = [];
@@ -199,12 +209,13 @@ for w = [22 25 26]
                     figure(f1);
                     subplot(1,5,ap); 
                     % plot 1 single mean amplitude of all active synapses for this AP/cell/week
-                    plot(xpos,mean(ampsMat),['o' color]); hold on  
+                    plot(xpos,mean(ampsMat),['o' color]); hold on 
+                    
                     figure(f3);
                     subplot(1,5,ap); 
                     % plot 1 single CoV of all active synapses for this AP/cell/week
                     plot(xpos,std(ampsMat)/mean(ampsMat),['o' color]); hold on 
-                    
+
                     %  store this mean for plotting overall median of all cells for this AP/week
                     ampMeans(end+1,1) = mean(ampsMat); 
                     %  store this COV for plotting overall median of all cells for this AP/week
@@ -233,13 +244,13 @@ for w = [22 25 26]
             plot([ap-0.4 ap+0.4]+shift_x, [medianBarCov,medianBarCov],['-' color])
             ylim([-0.05 1]); 
             xlim([ap-0.5 ap+0.5+1])            
-            
+
             figure(f2);
             subplot(3,5,ap);
             stdShade(allShapesMeans(:,3:end-2),0.1,[0 0 shift_x]); hold on;
             set(gca,'yminortick','on')
             ylim([-0.15 1.05]); xlim([0 12])
-            
+
             subplot(3,5,[ap+5 ap+10]);
             plot(randi([(ap*10000)-3000 (ap*10000)-1000]+(shift_x*shift_jitter), [1, length(decayTimes)])/10000, decayTimes', ['o' color]); hold on
             plot([ap-0.35 ap-0.05]+shift_x, [median(decayTimes),median(decayTimes)],['-' color])
@@ -260,11 +271,11 @@ end
 stimStart_2 = 810;
 frontTail_2 = 3; backTail_2 = 6;
 colors = ['k','b']; genotypes = [148, 225];
-for w = 1%[22 25 26]
+for w = 1%[22 25 26] % use the array with week labels to plot for each week separately
     f1=figure('name',['week ' num2str(w) ' 2Hz']); set(f1,'windowstyle','docked'); clf;
     for g = 1:length(genotypes)
         shift_x = g-1; shift_jitter = 10000; color = colors(g);%clf;
-        thisCondition = tomVSwt(tomVSwt.Condition == num2str(genotypes(g)),:);% & tomVSwt.Week == w,:);
+        thisCondition = tomVSwt(tomVSwt.Condition == num2str(genotypes(g)),:);% & tomVSwt.Week == w,:); % use the extra filter option to plot for each week separately
         ap=1;
         % clear variables here if you plot them for per AP for all cells
         ampMeans = []; covMeans = [];  decayTimes = []; riseTimes = []; allShapesMeans = [];
@@ -336,10 +347,11 @@ end
 
 
 
-%% 2Hz  AP ratios
+%% 2Hz  AP ratios: 2nd/1st and 5th/1st
 colors = ['k','b']; genotypes = [148, 225]; clf; 
 shift=0;
-wt=mean(cell2mat(table2cell(tomVSwt(tomVSwt.Condition == '148',{'fiveAt2Hz_dFoF0'}))),1);
+wt=mean(cell2mat(table2cell(tomVSwt(tomVSwt.Condition == '148',{'fiveAt2Hz_dFoF0'}))),1);  % mean value from all wt measurements,
+%     potentially to be used for normalization
 for ap = [2,5]
     apRatios = cellfun(@(x) x(:,ap)./x(:,1), tomVSwt.fiveAt2Hz_dFoF0, 'uniformoutput', false);
     for g = 1:length(genotypes)
@@ -356,10 +368,10 @@ for ap = [2,5]
 end
 
 %% Examples of individual traces
-
+% to do (for final presentation)
 
 %% Examples of raster plots for 0.75Hz
-
+% to do (for final presentation)
 
 %% RRP depletion during 40Hz stimulation
 genotypes = [148, 225];
@@ -436,49 +448,54 @@ xlim([0 3])
 
 
 %% RRP replenishment after 40Hz stimulation
-% first detect active recovery potentials
-stimStarts = [1055 1085];
-frontTail = 2;
-backTail = 6;
+% load already existing data;
+load tomVswt_rasterRecovery.mat
+tomVSwt = [tomVSwt, tomVswt_rasterRecovery];
 
-parfor cellNum = 1:size(tomVSwt,1)
-    apScores = [];
-    apPositions = [];
-    apBinary = [];
-    for synNum = 1:size(tomVSwt.dFoverF0_detrend{cellNum,1},1)
-        for apTime = 1:length(stimStarts)
-            noiseTrace = tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,1065:1075);
-            apTrace = tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,stimStarts(apTime)-frontTail:stimStarts(apTime)+backTail);
-            
-            lagFrames = [frontTail+1:frontTail+3];
-            peakLag = cell2mat(findStimulationLag(apTrace(lagFrames)));
-            peakIdx = lagFrames(peakLag+length(lagFrames)-1);
-            
-            shiftFactor = min(apTrace);     % apTrace is being shifted above zero just for detection purposes
-            if shiftFactor > 0
-                apTrace = apTrace-abs(shiftFactor);
-            elseif shiftFactor < 0
-                apTrace = apTrace+abs(shiftFactor);
-            end
-            
-            [apBin, apScore, apPos] = isItAP(apTrace, noiseTrace, 'mini',5,peakIdx); 
-            
-            apScores(synNum, apTime) = apScore;
-            if apPos ~= 0
-               apPos = apPos + (stimStarts(apTime)-frontTail-1);
-            end 
-            apPositions(synNum, apTime) = apPos;
-            apBinary(synNum, apTime) = apBin;
-        end
-        
-    end
-    allApEvals_bin{cellNum,1} = apBinary;
-    allApEvals_scores{cellNum,1} = apScores;
-    allApEvals_pos{cellNum,1} = apPositions;
-    %return
-end
-fprintf('Done.\n')
-tomVSwt = [tomVSwt table(allApEvals_bin, allApEvals_scores, allApEvals_pos,'variablenames',{'binaryRasterRecovery','apScoresRecovery','apPositionsRecovery'})];
+% first detect active recovery potentials
+% stimStarts = [1055 1085];
+% frontTail = 2;
+% backTail = 6;
+
+%%% this code runs the detection from scratch
+% parfor cellNum = 1:size(tomVSwt,1)
+%     apScores = [];
+%     apPositions = [];
+%     apBinary = [];
+%     for synNum = 1:size(tomVSwt.dFoverF0_detrend{cellNum,1},1)
+%         for apTime = 1:length(stimStarts)
+%             noiseTrace = tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,1065:1075);
+%             apTrace = tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,stimStarts(apTime)-frontTail:stimStarts(apTime)+backTail);
+%             
+%             lagFrames = [frontTail+1:frontTail+3];
+%             peakLag = cell2mat(findStimulationLag(apTrace(lagFrames)));
+%             peakIdx = lagFrames(peakLag+length(lagFrames)-1);
+%             
+%             shiftFactor = min(apTrace);     % apTrace is being shifted above zero just for detection purposes
+%             if shiftFactor > 0
+%                 apTrace = apTrace-abs(shiftFactor);
+%             elseif shiftFactor < 0
+%                 apTrace = apTrace+abs(shiftFactor);
+%             end
+%             
+%             [apBin, apScore, apPos] = isItAP(apTrace, noiseTrace, 'mini',5,peakIdx); 
+%             
+%             apScores(synNum, apTime) = apScore;
+%             if apPos ~= 0
+%                apPos = apPos + (stimStarts(apTime)-frontTail-1);
+%             end 
+%             apPositions(synNum, apTime) = apPos;
+%             apBinary(synNum, apTime) = apBin;
+%         end
+%         
+%     end
+%     allApEvals_bin{cellNum,1} = apBinary;
+%     allApEvals_scores{cellNum,1} = apScores;
+%     allApEvals_pos{cellNum,1} = apPositions;
+%     %return
+% end
+% fprintf('Done.\n')
+% tomVSwt = [tomVSwt table(allApEvals_bin, allApEvals_scores, allApEvals_pos,'variablenames',{'binaryRasterRecovery','apScoresRecovery','apPositionsRecovery'})];
 
 % then plot ratios of active recovery APs
 clearvars -except tom*
@@ -486,9 +503,9 @@ genotypes = [148, 225];
 f=figure('name','RRP replenishment rate'); set(f,'windowstyle','docked'); clf;
 stimStarts = [1055 1085];
 colors = ['k','b'];
-for ap = 1:length(stimStarts)
+for g = 1:length(genotypes)
     ratMeans=[];
-    for g = 1:length(genotypes)
+    for ap = 1:length(stimStarts)
         thisCondition = tomVSwt(tomVSwt.Condition == num2str(genotypes(g)),:);
         r=1;
         for cellNum = 1:size(thisCondition,1)
@@ -508,18 +525,159 @@ for ap = 1:length(stimStarts)
                         promRatios(end+1,1) = apProminence/fortyProminence;
                     end
                 end
-                ratMeans(r,g) = mean(promRatios);
+                ratMeans(r,ap) = mean(promRatios);
                 r=r+1;
             end
         end
     end
-    ratsGen1 = ratMeans(ratMeans(:,1)~=0,1);
-    ratsGen2 = ratMeans(ratMeans(:,2)~=0,2);
-    subplot(121+ap-1); hold on;
-    boxplot([ratsGen1; ratsGen2], [ones(size(ratsGen1)); ones(size(ratsGen2))+1],'notch','on');
-    scatter(randi([920, 1070], [1,length(ratsGen1)])/1000,ratsGen1,'k');
-    scatter(randi([920, 1070]+1000, [1,length(ratsGen2)])/1000,ratsGen2,'b');
-    ylim([0.1 1.45]); set(gca,'yminortick','on')
+%     ratiosAp21 = ratMeans(ratMeans(:,1)~=0,1);
+%     ratiosAp51 = ratMeans(ratMeans(:,2)~=0,2);
+    ratiosAp21 = ratMeans(:,1);
+    ratiosAp51 = ratMeans(:,2);
+    
+    subplot(121+g-1); hold on;
+    boxplot([ratiosAp21; ratiosAp51], [ones(size(ratiosAp21)); ones(size(ratiosAp51))+1],'notch','on');
+%     scatter(randi([920, 1070], [1,length(ratiosAp1)])/1000,ratiosAp1,'k');
+%     scatter(randi([920, 1070]+1000, [1,length(ratiosAp2)])/1000,ratiosAp2,'b');
+    plot([1.1 1.9], [ratiosAp21 ratiosAp51],['-o' colors(g)])
+    ylim([-0.05 3]); set(gca,'yminortick','on')
 end
 
+%% mini detection
+tomVSwt(strcmp(tomVSwt.FileName,{'Results_210622_TomKOvsWT_cs04_001'}),:) = []; % this cell is corrupted in baseline
+clearvars -except tom*
+miniFrontTail = 4;
+miniBackTail = 12;
+warning('off')
+tic
+parfor cellNum = 1:size(tomVSwt,1)
+    allPos = []; allBin = [];
+    scoreTreshold = 10; minPeakH = 0.07;
+
+    for synNum = 1:size(tomVSwt.dFoverF0_detrend{cellNum,1},1)
+        [~, pks] = findpeaks(tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,10:590),'minpeakheight',minPeakH,'minpeakdistance',10);
+        if ~isempty(pks) 
+            pks=pks+9;
+            for thisPeak = 1:length(pks)
+                miniNoise = tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,5:20);
+                [isItEvent, ~, miniPosition] = isItAP(tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,...
+                    pks(thisPeak)-miniFrontTail:pks(thisPeak)+miniBackTail),miniNoise, 'mini',scoreTreshold);
+                if miniPosition ~= 0
+                   miniPosition = miniPosition + (pks(thisPeak)-miniFrontTail-1);
+                end 
+                allPos(synNum, pks(thisPeak)) = miniPosition;
+                allBin(synNum, pks(thisPeak)) = isItEvent;
+            end
+        end
+    end
+    allMiniBinary{cellNum,1} = allBin;
+    allMiniPosition{cellNum,1} = allPos;
+end
+warning('on')
+toc
+fprintf('Done.\n')
+tomVSwt = [tomVSwt table(allMiniBinary, allMiniPosition,'variablenames',{'binaryMinis','apPositionsMini'})];
+
+%%% scanning approach (slow)
+% scanFrameStart = 1;
+% backTail = 7;
+% clf
+% 
+% parfor cellNum = 1:size(tomVSwt,1)
+%     apScores = [];
+%     apPositions = [];
+%     apBinary = [];
+%     for synNum = 1:size(tomVSwt.dFoverF0_detrend{cellNum,1},1)
+% %         plot(tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,1:800),'k'); hold on;
+%         for scanFrameIdx = scanFrameStart:599-scanFrameStart-backTail
+%             noiseStart = 1;%randi(589);
+%             noiseTrace = tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,noiseStart:noiseStart+backTail);
+%             [apBin, apScore, apPos] = isItAP(tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,scanFrameIdx:scanFrameIdx+backTail), noiseTrace, 'mini'); 
+%             
+% %             plot(scanFrameIdx:scanFrameIdx+backTail,tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,scanFrameIdx:scanFrameIdx+backTail));
+% %             if apBin > 0 && apPos > 0
+% %                 plot(apPos+scanFrameIdx-1,tomVSwt.dFoverF0_detrend{cellNum,1}(synNum,apPos+scanFrameIdx-1),'ok');
+% %             end
+%             
+%             apScores(synNum, scanFrameIdx+2) = apScore;
+%             if apPos ~= 0
+%                apPos = apPos + scanFrameIdx-2;
+%             end 
+%             apPositions(synNum, scanFrameIdx+2) = apPos;
+%             apBinary(synNum, scanFrameIdx+2) = apBin;
+%         end
+%         
+%     end
+%     allApEvals_bin{cellNum,1} = apBinary;
+%     allApEvals_scores{cellNum,1} = apScores;
+%     allApEvals_pos{cellNum,1} = apPositions;
+%     %return
+% end
+% fprintf('Done.\n')
+
+%% mini quantification
+clearvars -except tom*
+genotypes = [148, 225];
+
+for g=1:length(genotypes)
+    thisCondition = tomVSwt(tomVSwt.Condition == num2str(genotypes(g)),:);
+    for cellNum = 1:size(thisCondition,1)
+        cellRaster = thisCondition.binaryMinis{cellNum,1};
+        [activeSyn, miniTime] = find(cellRaster==1);
+        if ~isempty(activeSyn)
+            m=1; miniShapes=[]; miniAmps=[];
+            for miniNum = 1:length(activeSyn)
+                mini = thisCondition.dFoverF0_detrend{cellNum,1}(activeSyn(miniNum),miniTime(miniNum)-3:miniTime(miniNum)+7);
+                miniShapes(m,:) = mini;
+                miniAmps(m,1) = thisCondition.dFoverF0_detrend{cellNum,1}(activeSyn(miniNum),miniTime(miniNum));
+                m=m+1;
+            end
+        end
+        allMiniShapes{cellNum,g} = miniShapes;
+        allMiniAmps{cellNum,g} = miniAmps;
+    end
+    
+    % get percentage of synapses that show spontaneous release 
+    miniFreq = cellfun(@(x, y) (length(x)./size(y,1))*100,allMiniAmps(1:size(thisCondition,1),g),thisCondition.RawSignal,'uniformoutput',false);
+    miniFreqs{1,g} = miniFreq;
+end
+f=figure('name','mini histograms'); set(f,'windowstyle','docked'); clf;
+
+histogram(cell2mat(allMiniAmps(:,2)),[0:0.01:0.5]); hold on;
+histogram(cell2mat(allMiniAmps(:,1)),[0:0.01:0.5])
+
+%% mean 0.75 and 2 Hz amps
+clearvars -except tom* *Mini*
+genotypes = [148, 225]; ampsPerCell=[]; shapesPerCell = [];
+for g = 1:length(genotypes)
+    thisCondition = tomVSwt(tomVSwt.Condition == num2str(genotypes(g)),:);
+    ap = 1; 
+    for cellNum = 1:size(thisCondition,1) 
+        stims = {'075';'2'};
+        for stim = 1:length(stims)
+            if stim == 1; stim_start = 600; frontTail = 3; backTail = 10; elseif stim == 2; stim_start = 810; frontTail = 1; backTail = 4; end
+            ampsMat = []; shapesMat = [];
+            cellRaster = thisCondition.(['binaryRaster' stims{stim,1}]){cellNum,1};
+            activeSyn = find(cellRaster(:,ap) > 0);
+            if ~isempty(activeSyn)
+                for idx = 1:length(activeSyn)
+                    ampsMat(end+1,1) = thisCondition.(['fiveAt' stims{stim,1} 'Hz_dFoF0']){cellNum,1}(activeSyn(idx),ap);
+                    sig = thisCondition.dFoverF0_detrend{cellNum,1}(activeSyn(idx),stim_start-frontTail:stim_start+backTail);
+                    shapesMat(end+1,:) = sig;
+                end
+            end
+            ampsPerCell(cellNum,stim+(2*(g-1))) = mean(ampsMat);
+            shapesPerCell{cellNum,stim+(2*(g-1))} = shapesMat;
+        end
+    end
+end
+mean075wt=ampsPerCell(~isnan(ampsPerCell(:,1)) & ampsPerCell(:,1) ~= 0,1);
+mean075tom=ampsPerCell(~isnan(ampsPerCell(:,3)) & ampsPerCell(:,3) ~= 0,3);
+mean2wt=ampsPerCell(~isnan(ampsPerCell(:,2)) & ampsPerCell(:,2) ~= 0,2);
+mean2tom=ampsPerCell(~isnan(ampsPerCell(:,4)) & ampsPerCell(:,4) ~= 0,4);
+
+plot([mean(mean075wt) mean(mean075wt)],[0 200], 'k');
+plot([mean(mean2wt) mean(mean2wt)],[0 200], '-.k');
+plot([mean(mean075tom) mean(mean075tom)],[0 200], 'b');
+plot([mean(mean2tom) mean(mean2tom)],[0 200], '-.b');
 
