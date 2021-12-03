@@ -38,7 +38,8 @@ genotypes = [148, 225]; colors =  ['k';'b'];
 weeks = [22 25 26];
 
 for pt = 1:length(plotTypes)
-%     wt=mean(mean(cell2mat(table2cell(tomVSwt(tomVSwt.Condition == '148',plotTypes(pt))))));
+%     wt=mean(mean(cell2mat(table2cell(tomVSwt(tomVSwt.Condition == '148',plotTypes(pt)))))); % mean value from all wt measurements,
+%     potentially to be used for normalization
     f=figure('name',string(plotTypes(pt))); clf; set(f,'windowstyle','docked');
     for g = 1:length(genotypes)
         allMeans = [];
@@ -64,8 +65,8 @@ for pt = 1:length(plotTypes)
         end
         if genotypes(g) == 148; title('wild-type'); elseif genotypes(g) == 225; title('tomosynKO');end
         xlabel('AP #'); ylabel('iGluSnFR dF/F0');
-        boxplot(allMeans,[1 2 3 4 5],'notch','on','PlotStyle','traditional','colors',colors(g),'Widths',0.9,'MedianStyle','line');
-        %ylim([-0.05 1]) % some outliers are cropped
+        boxplot(allMeans,[1:1:5],'notch','on','PlotStyle','traditional','colors',colors(g),'Widths',0.9,'MedianStyle','line');
+        %ylim([-0.05 1]) % same y axes for better comparison, but then some outliers are cropped
         set(gca,'yminortick','on');
     end
 end
@@ -121,7 +122,6 @@ parfor cellNum = 1:size(tomVSwt,1)
     allApEvals_bin_2{cellNum,1} = apBinary_2;
     allApEvals_scores_2{cellNum,1} = apScores_2;
     allApEvals_pos_2{cellNum,1} = apPositions_2;
-    %return
 end
 tomVSwt = [tomVSwt, table(allApEvals_bin_075, allApEvals_scores_075, allApEvals_pos_075, allApEvals_bin_2, allApEvals_scores_2, allApEvals_pos_2, ...
     'variablenames',{'binaryRaster075','apScores075','apPositions075','binaryRaster2','apScores2','apPositions2'})];
