@@ -543,7 +543,7 @@ for g = 1:length(genotypes)
     ylim([-0.05 3]); set(gca,'yminortick','on')
 end
 
-%% mini detection
+%% mini detection (about 10 min)
 tomVSwt(strcmp(tomVSwt.FileName,{'Results_210622_TomKOvsWT_cs04_001'}),:) = []; % this cell is corrupted in baseline
 clearvars -except tom*
 miniFrontTail = 4;
@@ -578,7 +578,7 @@ toc
 fprintf('Done.\n')
 tomVSwt = [tomVSwt table(allMiniBinary, allMiniPosition,'variablenames',{'binaryMinis','apPositionsMini'})];
 
-%%% scanning approach (slow)
+%%% scanning approach (slow, hours)
 % scanFrameStart = 1;
 % backTail = 7;
 % clf
@@ -615,7 +615,7 @@ tomVSwt = [tomVSwt table(allMiniBinary, allMiniPosition,'variablenames',{'binary
 % end
 % fprintf('Done.\n')
 
-%% mini quantification
+%% mini quantification and visualisation
 clearvars -except tom*
 genotypes = [148, 225];
 
@@ -642,13 +642,14 @@ for g=1:length(genotypes)
     miniFreqs{1,g} = miniFreq;
 end
 f=figure('name','mini histograms'); set(f,'windowstyle','docked'); clf;
-
+subplot(2,3,[1:3])
 histogram(cell2mat(allMiniAmps(:,2)),[0:0.01:0.5]); hold on;
 histogram(cell2mat(allMiniAmps(:,1)),[0:0.01:0.5])
+ylabel('mGT count')
+xlabel('mGT amplitude')
 
-%% mean 0.75 and 2 Hz amps
-clearvars -except tom* *Mini*
-genotypes = [148, 225]; ampsPerCell=[]; shapesPerCell = [];
+clearvars -except tom* *Mini* genotypes
+ampsPerCell=[]; shapesPerCell = [];
 for g = 1:length(genotypes)
     thisCondition = tomVSwt(tomVSwt.Condition == num2str(genotypes(g)),:);
     ap = 1; 
@@ -670,14 +671,45 @@ for g = 1:length(genotypes)
             shapesPerCell{cellNum,stim+(2*(g-1))} = shapesMat;
         end
     end
+    subplot(2,3,3+stim-1); hold on % 0.75 Hz
+    stdShade(cell2mat(shapesPerCell(:,end-1)),0.1,[0 0 g-1]); hold on;
+    set(gca,'yminortick','on')
+    ylim([-0.15 0.9]);
+    legend({'wt std','wt mean','tomKO std','tomKO mean'})
+    title('1st evoked AP in 0.75 Hz')
+    xlabel('frames')
+    ylabel('iGluSnFR amplitude')
+    
+    subplot(2,3,3+stim); hold on % 2 Hz
+    stdShade(cell2mat(shapesPerCell(:,end)),0.1,[0 0 g-1]); hold on;
+    set(gca,'yminortick','on')
+    ylim([-0.15 0.9]); xlim([0 7])
+    legend({'wt std','wt mean','tomKO std','tomKO mean'})
+    title('1st evoked AP in 2 Hz')
+    xlabel('frames')
+    ylabel('iGluSnFR amplitude')
 end
+
+subplot(2,3,6); hold on % 2 Hz
+stdShade(cell2mat(allMiniShapes(:,1)),0.1,[0 0 0]); hold on;
+stdShade(cell2mat(allMiniShapes(:,2)),0.1,[0 0 1]);
+set(gca,'yminortick','on')
+ylim([-0.15 0.9]); 
+legend({'wt std','wt mean','tomKO std','tomKO mean'})
+title('average mini shape')
+xlabel('frames')
+ylabel('iGluSnFR amplitude')
+
 mean075wt=ampsPerCell(~isnan(ampsPerCell(:,1)) & ampsPerCell(:,1) ~= 0,1);
 mean075tom=ampsPerCell(~isnan(ampsPerCell(:,3)) & ampsPerCell(:,3) ~= 0,3);
 mean2wt=ampsPerCell(~isnan(ampsPerCell(:,2)) & ampsPerCell(:,2) ~= 0,2);
 mean2tom=ampsPerCell(~isnan(ampsPerCell(:,4)) & ampsPerCell(:,4) ~= 0,4);
 
+subplot(2,3,[1:3])
 plot([mean(mean075wt) mean(mean075wt)],[0 200], 'k');
 plot([mean(mean2wt) mean(mean2wt)],[0 200], '-.k');
 plot([mean(mean075tom) mean(mean075tom)],[0 200], 'b');
 plot([mean(mean2tom) mean(mean2tom)],[0 200], '-.b');
+legend({'tomKO','wt','wt 0.75Hz','wt 2Hz','tomKO 0.75Hz', 'tomKO 2Hz'})
+
 
